@@ -3,25 +3,39 @@ package sg.edu.nus.iss.VTTP5a_ssf_2023_assessment.component;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.springframework.stereotype.Component;
 
 import jakarta.json.Json;
 import jakarta.json.JsonArray;
+import jakarta.json.JsonObject;
+import sg.edu.nus.iss.VTTP5a_ssf_2023_assessment.model.Event;
 
 @Component
 public class FileReaderComponent {
-    public String readFile(String fileName){
-        String message = "";
+
+    public List<Event> getEvents(String fileName){
+        List<Event> events = new ArrayList<>();
         try {
             InputStream is = new FileInputStream(fileName);
-            JsonArray jsonObject = Json.createReader(is).readArray();
-            message = jsonObject.toString();
+            JsonArray jsonArray = Json.createReader(is).readArray();
+            populateEventList(jsonArray, events);
 
         } catch (FileNotFoundException e) {
-            message = "Fle not found!";
+            System.out.println(e.getMessage());
         }
-        return message;
+        return events;
+    }
+
+    private void populateEventList(JsonArray jsonArray, List<Event> eventList){
+        for(int i = 0; i < jsonArray.size(); i++){
+            JsonObject jsonObject = jsonArray.getJsonObject(i);
+            Event event = new Event(jsonObject.getInt("eventId"), jsonObject.getString("eventName"), jsonObject.getInt("eventSize"), jsonObject.getJsonNumber("eventDate").longValue(), jsonObject.getInt("participants"));
+
+            eventList.add(event);
+        }
     }
         
 }
